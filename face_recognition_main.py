@@ -1,12 +1,13 @@
-import numpy as np
-import cv2
-import copy
-import face_recognition
-import os
-import pickle
+from PIL import Image, ImageTk
 from imutils import paths
 from matplotlib import pyplot as plt
-from PIL import Image, ImageFilter
+from tkinter import Tk, Label, Menu, Toplevel, filedialog
+import copy
+import cv2
+import face_recognition
+import numpy as np
+import os
+import pickle
 
 def noise_reduce(img):
     ##figure_size = 5
@@ -52,7 +53,7 @@ def recognition_face(img):
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(new_image, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
     return new_image
-    
+
 ky_imgae = face_recognition.load_image_file("sample/Ky.jpg")
 ky_face_encoding = face_recognition.face_encodings(ky_imgae)[0]
 
@@ -86,14 +87,33 @@ known_face_names = [
 ]
 
 
-image = cv2.imread('group2.jpg')
-image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+image_name = 'group2.jpg'
+image = None
+image_rgb = None
+image_gray = None
 
-image_less_noise = noise_reduce(image_rgb)
-image_detect_edge = detect_edge(image_less_noise)
-image_detect_face = detect_face(image_rgb)
-image_recognize_face = recognition_face(image_less_noise)
+image_less_noise = None
+image_detect_edge = None
+image_detect_face = None
+image_recognize_face = None
+
+
+def reload_processing_data():
+    global image, image_rgb, image_gray, \
+            image_less_noise, image_detect_edge, \
+            image_detect_face, image_recognize_face
+
+    image = cv2.imread(image_name)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    image_less_noise = noise_reduce(image_rgb)
+    image_detect_edge = detect_edge(image_less_noise)
+    image_detect_face = detect_face(image_rgb)
+    image_recognize_face = recognition_face(image_less_noise)
+
+
+reload_processing_data()
 
 # plt.subplot(121),plt.imshow(image_rgb)
 # plt.subplot(121),plt.imshow(image_recognize_face)
@@ -102,12 +122,68 @@ image_recognize_face = recognition_face(image_less_noise)
 # cv2.imshow("original", cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR))
 # cv2.imshow("gray", image_gray)
 # cv2.imshow("noise reduce", cv2.cvtColor(image_less_noise, cv2.COLOR_RGB2BGR))
-cv2.imshow("edge detect", image_detect_edge)
+# cv2.imshow("edge detect", image_detect_edge)
 # cv2.imshow("face detect", cv2.cvtColor(image_detect_face, cv2.COLOR_RGB2BGR))
 # cv2.imshow("face recognize", cv2.cvtColor(image_recognize_face, cv2.COLOR_RGB2BGR))
-cv2.waitKey(0)
+# cv2.waitKey(0)
+
+root = Tk()
+
+im = Image.fromarray(image)
+imgtk = ImageTk.PhotoImage(image=im)
+
+panel = Label(root, image=imgtk)
+panel.pack(side="bottom", fill="both", expand="yes")
 
 
+def callback():
+    global image_name
+    image_name = filedialog.askopenfilename()
+    reload_processing_data()
+
+    im = Image.fromarray(image)
+    imgtk = ImageTk.PhotoImage(image=im)
+
+    panel.configure(image=imgtk)
+    panel.image = imgtk
 
 
+def noiseReduce():
+    im = Image.fromarray(image_less_noise)
+    imgtk = ImageTk.PhotoImage(image=im)
 
+    panel.configure(image=imgtk)
+    panel.image = imgtk
+
+
+def edgeDetect():
+    im = Image.fromarray(image_detect_edge)
+    imgtk = ImageTk.PhotoImage(image=im)
+
+    panel.configure(image=imgtk)
+    panel.image = imgtk
+
+
+def faceRecognize():
+    im = Image.fromarray(image_recognize_face)
+    imgtk = ImageTk.PhotoImage(image=im)
+
+    panel.configure(image=imgtk)
+    panel.image = imgtk
+
+
+menubar = Menu(root)
+filemenu = Menu(menubar, tearoff=0)
+filemenu.add_command(label="Open Image", command=callback)
+filemenu.add_separator()
+filemenu.add_command(label="Exit", command=root.quit)
+menubar.add_cascade(label="File", menu=filemenu)
+
+actions = Menu(menubar, tearoff=0)
+actions.add_command(label="Noise Reduce", command=noiseReduce)
+actions.add_command(label="Edge Detect", command=edgeDetect)
+actions.add_command(label="Face Recognize", command=faceRecognize)
+menubar.add_cascade(label="Actions", menu=actions)
+
+root.config(menu=menubar)
+root.mainloop()
