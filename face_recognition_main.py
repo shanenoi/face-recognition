@@ -21,13 +21,13 @@ def detect_edge(img):
     new_image = cv2.Canny(new_image,40,140)
     return new_image
 
-def detect_face(img):
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-    faces = face_cascade.detectMultiScale(image_gray, 1.1, 5)
-    new_image = copy.deepcopy(image_less_noise)
-    for (x, y, w, h) in faces:
-        cv2.rectangle(new_image, (x, y), (x+w, y+h), (255, 0, 0), 2)
-    return new_image
+# def detect_face(img):
+#     face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+#     faces = face_cascade.detectMultiScale(image_gray, 1.1, 5)
+#     new_image = copy.deepcopy(image_less_noise)
+#     for (x, y, w, h) in faces:
+#         cv2.rectangle(new_image, (x, y), (x+w, y+h), (255, 0, 0), 2)
+#     return new_image
 
 def recognition_face(img):
     face_locations = face_recognition.face_locations(img)
@@ -43,22 +43,16 @@ def recognition_face(img):
         best_match_index = np.argmin(face_distances)
         if matches[best_match_index] and face_distances[best_match_index] < 0.4:
             name = known_face_names[best_match_index]
-            print(name)
-            print(face_distances)
         face_names.append(name)
     new_image = copy.deepcopy(img)
     for (top, right, bottom, left), name in zip(face_locations, face_names):
         cv2.rectangle(new_image, (left, top), (right, bottom), (0, 0, 255), 2)
-        cv2.rectangle(new_image, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
         font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(new_image, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+        cv2.putText(new_image, name, (left, bottom + 28), font, 1.0, (0, 0, 255), 2)
     return new_image
 
 ky_imgae = face_recognition.load_image_file("sample/Ky.jpg")
 ky_face_encoding = face_recognition.face_encodings(ky_imgae)[0]
-
-van_imgae = face_recognition.load_image_file("sample/Van.jpg")
-van_face_encoding = face_recognition.face_encodings(van_imgae)[0]
 
 nv_imgae = face_recognition.load_image_file("sample/NV.jpg")
 nv_face_encoding = face_recognition.face_encodings(nv_imgae)[0]
@@ -69,12 +63,15 @@ dv_face_encoding = face_recognition.face_encodings(dv_imgae)[0]
 bao_imgae = face_recognition.load_image_file("sample/Bao.jpg")
 bao_face_encoding = face_recognition.face_encodings(bao_imgae)[0]
 
+thai_imgae = face_recognition.load_image_file("sample/Thai.jpg")
+thai_face_encoding = face_recognition.face_encodings(thai_imgae)[0]
+
 known_face_encodings = [
     nv_face_encoding,
     dv_face_encoding,
     bao_face_encoding,
     ky_face_encoding,
-    van_face_encoding
+    thai_face_encoding
 ]
 
 
@@ -83,11 +80,11 @@ known_face_names = [
     "D.Vu",
     "Bao",
     "Ky",
-    "Van"
+    "Thai"
 ]
 
 
-image_name = 'group2.jpg'
+image_name = 'intro.jpg'
 image = None
 image_rgb = None
 image_gray = None
@@ -109,7 +106,7 @@ def reload_processing_data():
 
     image_less_noise = noise_reduce(image_rgb)
     image_detect_edge = detect_edge(image_less_noise)
-    image_detect_face = detect_face(image_rgb)
+    # image_detect_face = detect_face(image_rgb)
     image_recognize_face = recognition_face(image_less_noise)
 
 
@@ -129,8 +126,10 @@ reload_processing_data()
 
 root = Tk()
 
-im = Image.fromarray(image)
-imgtk = ImageTk.PhotoImage(image=im)
+
+im = Image.fromarray(image_rgb)
+width, height = im.size
+imgtk = ImageTk.PhotoImage(image=im.resize([int(600 * width / height), 600]))
 
 panel = Label(root, image=imgtk)
 panel.pack(side="bottom", fill="both", expand="yes")
@@ -141,16 +140,25 @@ def callback():
     image_name = filedialog.askopenfilename()
     reload_processing_data()
 
-    im = Image.fromarray(image)
-    imgtk = ImageTk.PhotoImage(image=im)
+    im = Image.fromarray(image_rgb)
+    width, height = im.size
+    imgtk = ImageTk.PhotoImage(image=im.resize([int(600 * width / height), 600]))
 
     panel.configure(image=imgtk)
     panel.image = imgtk
 
+def original():
+    im = Image.fromarray(image_rgb)
+    width, height = im.size
+    imgtk = ImageTk.PhotoImage(image=im.resize([int(600 * width / height), 600]))
+
+    panel.configure(image=imgtk)
+    panel.image = imgtk
 
 def noiseReduce():
     im = Image.fromarray(image_less_noise)
-    imgtk = ImageTk.PhotoImage(image=im)
+    width, height = im.size
+    imgtk = ImageTk.PhotoImage(image=im.resize([int(600 * width / height), 600]))
 
     panel.configure(image=imgtk)
     panel.image = imgtk
@@ -158,7 +166,8 @@ def noiseReduce():
 
 def edgeDetect():
     im = Image.fromarray(image_detect_edge)
-    imgtk = ImageTk.PhotoImage(image=im)
+    width, height = im.size
+    imgtk = ImageTk.PhotoImage(image=im.resize([int(600 * width / height), 600]))
 
     panel.configure(image=imgtk)
     panel.image = imgtk
@@ -166,7 +175,8 @@ def edgeDetect():
 
 def faceRecognize():
     im = Image.fromarray(image_recognize_face)
-    imgtk = ImageTk.PhotoImage(image=im)
+    width, height = im.size
+    imgtk = ImageTk.PhotoImage(image=im.resize([int(600 * width / height), 600]))
 
     panel.configure(image=imgtk)
     panel.image = imgtk
@@ -180,6 +190,7 @@ filemenu.add_command(label="Exit", command=root.quit)
 menubar.add_cascade(label="File", menu=filemenu)
 
 actions = Menu(menubar, tearoff=0)
+actions.add_command(label="Original", command=original)
 actions.add_command(label="Noise Reduce", command=noiseReduce)
 actions.add_command(label="Edge Detect", command=edgeDetect)
 actions.add_command(label="Face Recognize", command=faceRecognize)
