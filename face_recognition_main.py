@@ -54,16 +54,11 @@ def load_samples():
         sample_names.append(name)
 
 
-def load_image_file():
-    global image, image_rgb, image_gray
+sample_faces = []
+sample_names = []
+load_samples()
 
-    image = cv2.imread(image_name)
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-
-# image_name = 'intro.jpg'
-image_name = '/tmp/abc.png'
+image_name = 'intro.jpg'
 image = None
 image_rgb = None
 image_gray = None
@@ -72,10 +67,15 @@ image_less_noise = None
 image_detect_edge = None
 image_recognize_face = None
 
-sample_faces = []
-sample_names = []
 
-load_samples()
+def load_image_file():
+    global image, image_rgb, image_gray
+
+    image = cv2.imread(image_name)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+
 load_image_file()
 
 
