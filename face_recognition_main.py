@@ -55,7 +55,7 @@ def face_recogniting(img):
 
     for (top, right, bottom, left), name in zip(detected_locs, face_names):
         cv2.rectangle(out_img, (left, top), (right, bottom), yellow, 2)
-        cv2.putText(out_img, name, (left, bottom + 28), None, 1.0, yellow, 2)
+        cv2.putText(out_img, name, (left, bottom + 30), None, 1.0, yellow, 2)
 
     return out_img
 

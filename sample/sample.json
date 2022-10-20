@@ -1,7 +1,18 @@
 {
-  "Nhu": ["nhu.jpg", "nhu-strange.jpg"],
-  "Quang": ["quang.jpg", "quang-nghien.jpg"],
-  "Thach": ["thach.jpg", "thach-other.jpg"],
-  "Viet": ["viet.jpg", "viet-right.jpg", "viet-left.jpg"],
-  "Danh": ["danh-font.png", "danh-left.png", "danh-right.png"]
+  "Nhu": ["nhu-m.png", "nhu-strange-m.png", "nhu-strange.jpg", "nhu-thach.jpg", "nhu.jpg"],
+  "Quang": ["quang-m.png", "quang-nghien-m.png", "quang-nghien.jpg", "quang.jpg"],
+  "Thach": ["thach-m.png", "thach-other-m.png", "thach-other.jpg", "thach.jpg"],
+  "Viet": ["viet-left-m.png", "viet-left.jpg", "viet-m.png", "viet-right-m.png", "viet-right.jpg", "viet.jpg"],
+  "Danh": ["danh-font-m.png", "danh-font.png", "danh-left-m.png", "danh-left.png", "danh-right-m.png", "danh-right.png"]
 }
+
+
+
+
+
+
+
+
+
+
+
