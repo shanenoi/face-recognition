@@ -4,6 +4,7 @@ import copy
 import cv2
 import face_recognition as fr
 import json
+import numpy as np
 from os import path
 
 
@@ -20,13 +21,31 @@ def edge_detecting(img):
     return cv2.Canny(out_img, 40, 140)
 
 
+def face_detecting(img):
+    detected_locs = fr.face_locations(img)
+
+    out_img = copy.deepcopy(img)
+    for (top, right, bottom, left) in detected_locs:
+        cv2.rectangle(out_img, (left, top), (right, bottom), yellow, 2)
+
+    return out_img
+
+
 def face_recogniting(img):
     face_names = []
     detected_locs = fr.face_locations(img)
     detected_faces = fr.face_encodings(img, detected_locs)
 
     for f_encoded in detected_faces:
-        matches = fr.compare_faces(sample_faces, f_encoded, 0.4)
+        average_face_distances = []
+        for sample_face in sample_faces:
+            average_face_distances.append(
+                np.average(
+                    fr.face_distance(sample_face, f_encoded)
+                )
+            )
+
+        matches = list(np.array(average_face_distances) < 0.4)
         name = ""
         if True in matches:
             first_idx = matches.index(True)
@@ -49,8 +68,11 @@ def load_samples():
         paths = json.load(jsonfile)
 
     for name in paths:
-        sample_img = fr.load_image_file(path.join(sample, paths[name]))
-        sample_faces.append(fr.face_encodings(sample_img)[0])
+        sample_faces_per_one = []
+        for img_path in paths[name]:
+            sample_img = fr.load_image_file(path.join(sample, img_path))
+            sample_faces_per_one.append(fr.face_encodings(sample_img)[0])
+        sample_faces.append(sample_faces_per_one)
         sample_names.append(name)
 
 
@@ -63,9 +85,10 @@ image = None
 image_rgb = None
 image_gray = None
 
-image_less_noise = None
-image_detect_edge = None
-image_recognize_face = None
+image_noise_reducing = None
+image_edge_detecting = None
+image_face_detecting = None
+image_face_recogniting = None
 
 
 def load_image_file():
@@ -80,13 +103,15 @@ load_image_file()
 
 
 def reload_processing_data():
-    global image_less_noise, image_detect_edge, image_recognize_face
+    global image_noise_reducing, image_edge_detecting, \
+           image_face_detecting,  image_face_recogniting
 
     load_image_file()
 
-    image_less_noise = noise_reducing(image_rgb)
-    image_detect_edge = edge_detecting(image_less_noise)
-    image_recognize_face = face_recogniting(image_less_noise)
+    image_noise_reducing = noise_reducing(image_rgb)
+    image_edge_detecting = edge_detecting(image_noise_reducing)
+    image_face_detecting = face_detecting(image_noise_reducing)
+    image_face_recogniting = face_recogniting(image_noise_reducing)
 
 
 def resize_image(img):
@@ -124,7 +149,7 @@ def original():
 
 
 def noiseReduce():
-    img = Image.fromarray(image_less_noise)
+    img = Image.fromarray(image_noise_reducing)
     imgtk = ImageTk.PhotoImage(image=resize_image(img))
 
     panel.configure(image=imgtk)
@@ -132,7 +157,15 @@ def noiseReduce():
 
 
 def edgeDetect():
-    img = Image.fromarray(image_detect_edge)
+    img = Image.fromarray(image_edge_detecting)
+    imgtk = ImageTk.PhotoImage(image=resize_image(img))
+
+    panel.configure(image=imgtk)
+    panel.image = imgtk
+
+
+def faceDetecting():
+    img = Image.fromarray(image_face_detecting)
     imgtk = ImageTk.PhotoImage(image=resize_image(img))
 
     panel.configure(image=imgtk)
@@ -140,7 +173,7 @@ def edgeDetect():
 
 
 def faceRecognize():
-    img = Image.fromarray(image_recognize_face)
+    img = Image.fromarray(image_face_recogniting)
     imgtk = ImageTk.PhotoImage(image=resize_image(img))
 
     panel.configure(image=imgtk)
@@ -158,6 +191,7 @@ image_processing = Menu(menu, tearoff=0)
 image_processing.add_command(label="Original", command=original)
 image_processing.add_command(label="Noise Reduce", command=noiseReduce)
 image_processing.add_command(label="Edge Detect", command=edgeDetect)
+image_processing.add_command(label="Face Detect", command=faceDetecting)
 image_processing.add_command(label="Face Recognize", command=faceRecognize)
 menu.add_cascade(label="Actions", menu=image_processing)
 
