@@ -24,7 +24,7 @@ def noise_reducing(img):
 
 def edge_detecting(img):
     out_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    return cv2.Canny(out_img, 40, 140)
+    return cv2.Canny(out_img, 45, 140)
 
 
 def face_detecting(img):
