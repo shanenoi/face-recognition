@@ -110,8 +110,8 @@ sample_names = []
 sample_faces_data = "sample_faces.data"
 sample_names_data = "sample_names.data"
 
-load_samples()
-# load_samples_data()
+# load_samples()
+load_samples_data()
 
 image_name = 'sample/intro.png'
 image = None
