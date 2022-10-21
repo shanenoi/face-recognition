@@ -14,7 +14,12 @@ sample = 'sample'
 
 
 def noise_reducing(img):
-    return cv2.fastNlMeansDenoisingColored(img, None, 7, 7, 7, 21)
+    outp_img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    outp_img = cv2.medianBlur(outp_img, 3)
+    outp_img = cv2.cvtColor(outp_img, cv2.COLOR_HSV2BGR)
+    outp_img = cv2.fastNlMeansDenoisingColored(outp_img, None, 7, 7, 7, 21)
+    outp_img = cv2.cvtColor(outp_img, cv2.COLOR_BGR2RGB)
+    return outp_img
 
 
 def edge_detecting(img):
@@ -105,10 +110,10 @@ sample_names = []
 sample_faces_data = "sample_faces.data"
 sample_names_data = "sample_names.data"
 
-# load_samples()
-load_samples_data()
+load_samples()
+# load_samples_data()
 
-image_name = 'intro.jpg'
+image_name = 'sample/intro.png'
 image = None
 image_rgb = None
 image_gray = None
