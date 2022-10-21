@@ -1,14 +1,15 @@
 from PIL import Image, ImageTk
+from os import path
 from tkinter import Tk, Label, Menu, filedialog
 import copy
 import cv2
 import face_recognition as fr
 import json
 import numpy as np
-from os import path
+import pickle
 
 
-yellow = (0, 255, 0)
+red = (255, 0, 0)
 sample = 'sample'
 
 
@@ -26,7 +27,7 @@ def face_detecting(img):
 
     out_img = copy.deepcopy(img)
     for (top, right, bottom, left) in detected_locs:
-        cv2.rectangle(out_img, (left, top), (right, bottom), yellow, 2)
+        cv2.rectangle(out_img, (left, top), (right, bottom), red, 2)
 
     return out_img
 
@@ -40,12 +41,12 @@ def face_recogniting(img):
         average_face_distances = []
         for sample_face in sample_faces:
             average_face_distances.append(
-                np.average(
+                np.round(np.average(
                     fr.face_distance(sample_face, f_encoded)
-                )
+                ), 1)
             )
 
-        matches = list(np.array(average_face_distances) < 0.4)
+        matches = list(np.array(average_face_distances) <= 0.4)
         name = ""
         if True in matches:
             first_idx = matches.index(True)
@@ -54,10 +55,23 @@ def face_recogniting(img):
     out_img = copy.deepcopy(img)
 
     for (top, right, bottom, left), name in zip(detected_locs, face_names):
-        cv2.rectangle(out_img, (left, top), (right, bottom), yellow, 2)
-        cv2.putText(out_img, name, (left, bottom + 30), None, 1.0, yellow, 2)
+        cv2.rectangle(out_img, (left, top), (right, bottom), red, 2)
+        cv2.putText(out_img, name, (left, bottom + 30), None, 1.0, red, 2)
 
     return out_img
+
+
+def save_var(var, file_name):
+    with open(file_name, 'wb') as file:
+        pickle.dump(var, file)
+
+
+def load_var(file_name):
+    var = None
+    with open(file_name, 'rb') as file:
+        myvar = pickle.load(file)
+        var = myvar
+    return var
 
 
 def load_samples():
@@ -75,10 +89,24 @@ def load_samples():
         sample_faces.append(sample_faces_per_one)
         sample_names.append(name)
 
+    save_var(sample_faces, sample_faces_data)
+    save_var(sample_names, sample_names_data)
+
+
+def load_samples_data():
+    global sample_faces, sample_names
+    sample_faces = load_var(sample_faces_data)
+    sample_names = load_var(sample_names_data)
+
 
 sample_faces = []
 sample_names = []
-load_samples()
+
+sample_faces_data = "sample_faces.data"
+sample_names_data = "sample_names.data"
+
+# load_samples()
+load_samples_data()
 
 image_name = 'intro.jpg'
 image = None
